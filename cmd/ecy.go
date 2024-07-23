@@ -30,16 +30,15 @@ type Data struct {
 	Entries []Entry `yaml:"exacolors"`
 }
 type Entry struct {
-	Identifier interface{} `yaml:"iden"`
-	Ansi string `yaml:"ansi"`
+	Identifiers []string `yaml:"iden"`
+	Ansi       string   `yaml:"ansi"`
 }
 
 func run(cmd *cobra.Command, args []string) {
-	fmt.Println("hello")
 	var ecyFile []byte
 	ecyFile, err := os.ReadFile(ecyPath)
 	if err != nil {
-		log.Fatal("error reading file: ", err)
+		log.Fatalf("error '%s' when reading file '%s'", err, ecyPath)
 	}
 
 	var out Data
@@ -47,19 +46,8 @@ func run(cmd *cobra.Command, args []string) {
 		log.Fatal("error unmarshalling data: ", err)
 	}
 	for _, entry := range out.Entries {
-		switch entry.Identifier.(type) {
-		case string:
-			fmt.Printf("%s=%s:", entry.Identifier, entry.Ansi)
-		case []string:
-			for _, identifier := range entry.Identifier.([]string) {
-				fmt.Printf("%s=%s:", identifier, entry.Ansi)
-			}
-		case map[string]interface{}:
-			fmt.Print("map")
-		case map[interface{}]interface{}:
-			fmt.Print("mapi")
-		default:
-			fmt.Printf("%s:", entry.Ansi)
+		for _, identifier := range entry.Identifiers {
+			fmt.Printf("%s=%s:", identifier, entry.Ansi)
 		}
 	}
 }
