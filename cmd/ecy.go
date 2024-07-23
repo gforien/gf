@@ -30,8 +30,8 @@ type Data struct {
 	Entries []Entry `yaml:"exacolors"`
 }
 type Entry struct {
-	Identifiers []string `yaml:"iden"`
 	Ansi       string   `yaml:"ansi"`
+	Identifiers []string `yaml:"iden"`
 }
 
 func run(cmd *cobra.Command, args []string) {
