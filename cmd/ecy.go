@@ -16,7 +16,7 @@ var ecyCmd = &cobra.Command{
 	Run:   Ecy,
 }
 
-var EcyPath = fmt.Sprintf("%s/%s", os.Getenv("HOME"), ".dotfiles/common/config/exa/colors.yaml")
+var EcyPath = fmt.Sprintf("%s/%s", os.Getenv("HOME"), ".dotfiles/common/config/eza/colors.yaml")
 
 type Data struct {
 	Entries []Entry `yaml:"exacolors"`
