@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // tfgrepCmd represents the tfgrep command
@@ -27,8 +29,7 @@ func readLines(inputChan chan<- string) {
 }
 
 // Function to process lines from the input channel and send results to the output channel
-func processLines(inputChan <-chan string, outputChan chan<- string) {
-	re := regexp.MustCompile(`Reading...|Read complete|Refreshing state...`)
+func processLines(inputChan <-chan string, outputChan chan<- string, re *regexp.Regexp) {
 	isDot := false
 
 	for line := range inputChan {
@@ -52,12 +53,26 @@ func writeLines(outputChan <-chan string) {
 	}
 }
 
+// readConfig reads config file $HOME/.gf.yaml and returns
+// a regex matching any of the defined patterns.
+func readConfig() *regexp.Regexp {
+	patterns := []string{"Reading...", "Read complete"}
+	err := viper.UnmarshalKey("tfgrep.patterns", &patterns)
+	cobra.CheckErr(err)
+
+	pattern := strings.Join(patterns, "|")
+	re := regexp.MustCompile(pattern)
+
+	return re
+}
+
 func TfGrep(cmd *cobra.Command, args []string) {
+	re := readConfig()
 	inputChan := make(chan string)
 	outputChan := make(chan string)
 
 	go readLines(inputChan)
-	go processLines(inputChan, outputChan)
+	go processLines(inputChan, outputChan, re)
 	writeLines(outputChan)
 }
 
