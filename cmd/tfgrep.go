@@ -31,9 +31,14 @@ func readLines(inputChan chan<- string) {
 // Function to process lines from the input channel and send results to the output channel
 func processLines(inputChan <-chan string, outputChan chan<- string, dotRegex *regexp.Regexp, hideRegex *regexp.Regexp) {
 	isDot := false
+	isEmpty := false
 
 	for line := range inputChan {
 		if hideRegex.MatchString(line) {
+			isEmpty = true
+			continue
+		} else if isEmpty {
+			isEmpty = false
 			continue
 		} else if dotRegex.MatchString(line) {
 			outputChan <- "."
@@ -44,6 +49,7 @@ func processLines(inputChan <-chan string, outputChan chan<- string, dotRegex *r
 		} else {
 			outputChan <- line + "\n"
 		}
+		isEmpty = false
 	}
 	close(outputChan)
 }
