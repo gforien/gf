@@ -105,11 +105,6 @@ func writeNote(tpls *template.Template, day time.Time, outDir string) error {
 	return nil
 }
 
-// from https://brandur.org/fragments/go-days-in-month
-func daysIn(t time.Time) int {
-	return time.Date(t.Year(), t.Month()+1, 0, 0, 0, 0, 0, time.UTC).Day()
-}
-
 // unmarshalStringEnv
 // Unmarshal a config string containing environment variables,
 // and evaluate them.
