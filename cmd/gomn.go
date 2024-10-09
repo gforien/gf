@@ -105,9 +105,8 @@ func writeNote(tpls *template.Template, day time.Time, outDir string) error {
 	return nil
 }
 
-// unmarshalStringEnv
-// Unmarshal a config string containing environment variables,
-// and evaluate them.
+// unmarshalStringEnv unmarshalls a viper config string containing
+// environment variables, and evaluate them.
 func unmarshalStringEnv(key string) string {
 	var str string
 	err := viper.UnmarshalKey(key, &str)
