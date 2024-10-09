@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -24,6 +25,14 @@ func checkErr(err error) {
 	if err != nil {
 		log.Default().Panic(err)
 	}
+}
+
+type ErrFileExists struct {
+	FileName string
+}
+
+func (e *ErrFileExists) Error() string {
+	return fmt.Sprintf("Skipping '%s'", e.FileName)
 }
 
 func Gomn(cmd *cobra.Command, args []string) {
@@ -62,26 +71,38 @@ func Gomn(cmd *cobra.Command, args []string) {
 
 	// Iterate over all the days of the current month
 	for day := startOfMonth; day.Month() == currentMonth; day = day.AddDate(0, 0, 1) {
-		fileName := day.Format("060102") + ".md"
-		filePath := outDir + fileName
-
-		file, err := os.OpenFile(filePath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
-		defer file.Close()
-		if err != nil {
-			log.Default().Printf("Skipping '%s'", fileName)
+		err := writeNote(tpls, day, outDir)
+		var fileExists *ErrFileExists
+		if errors.As(err, &fileExists) {
+			log.Default().Println(err)
+			continue
+		} else if err != nil {
+			log.Default().Printf("Unexpected error: %s", err)
 			continue
 		}
-
-		// Write content to the file (if necessary)
-		err = tpls.Execute(file, map[string]any{
-			"Date": day,
-		})
-		if err != nil {
-			log.Default().Printf("Unexpected error in '%s', skipping", fileName)
-			continue
-		}
-		log.Default().Printf("Templating '%s'", fileName)
 	}
+}
+
+func writeNote(tpls *template.Template, day time.Time, outDir string) error {
+	fileName := day.Format("060102") + ".md"
+	filePath := outDir + fileName
+
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
+	defer file.Close()
+	if err != nil {
+		return &ErrFileExists{fileName}
+	}
+
+	// Write content to the file (if necessary)
+	err = tpls.Execute(file, map[string]any{
+		"Date": day,
+	})
+	if err != nil {
+		return err
+	}
+	log.Default().Printf("Templating '%s'", fileName)
+
+	return nil
 }
 
 // from https://brandur.org/fragments/go-days-in-month
