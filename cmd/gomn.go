@@ -22,7 +22,7 @@ var gomnCmd = &cobra.Command{
 
 func checkErr(err error) {
 	if err != nil {
-		log.Panic(err)
+		log.Default().Panic(err)
 	}
 }
 
@@ -53,12 +53,40 @@ func Gomn(cmd *cobra.Command, args []string) {
 	tpls, err := template.New("titleTest").Funcs(funcMap).Parse(fileStr)
 	checkErr(err)
 
-	err = tpls.Execute(os.Stdout, map[string]any{
-		"Date": time.Now(),
-	})
-	checkErr(err)
+	outDir := unmarshalStringEnv("gomn.output_dir")
 
-	// outDir := unmarshalStringEnv("gomn.output_dir")
+	now := time.Now()
+	currentYear, currentMonth, _ := now.Date()
+	location := now.Location()
+	startOfMonth := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, location)
+
+	// Iterate over all the days of the current month
+	for day := startOfMonth; day.Month() == currentMonth; day = day.AddDate(0, 0, 1) {
+		fileName := day.Format("060102") + ".md"
+		filePath := outDir + fileName
+
+		file, err := os.OpenFile(filePath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
+		defer file.Close()
+		if err != nil {
+			log.Default().Printf("Skipping '%s'", fileName)
+			continue
+		}
+
+		// Write content to the file (if necessary)
+		err = tpls.Execute(file, map[string]any{
+			"Date": day,
+		})
+		if err != nil {
+			log.Default().Printf("Unexpected error in '%s', skipping", fileName)
+			continue
+		}
+		log.Default().Printf("Templating '%s'", fileName)
+	}
+}
+
+// from https://brandur.org/fragments/go-days-in-month
+func daysIn(t time.Time) int {
+	return time.Date(t.Year(), t.Month()+1, 0, 0, 0, 0, 0, time.UTC).Day()
 }
 
 // unmarshalStringEnv
@@ -75,6 +103,7 @@ func unmarshalStringEnv(key string) string {
 		fmt.Sprintf("echo %s", str))
 	outBytes, err := cmd.Output()
 	checkErr(err)
+
 	outStr := (string)(outBytes)
 	outStr = strings.TrimSpace(outStr)
 	return outStr
