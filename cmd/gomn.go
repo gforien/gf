@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
-	"strings"
 	"text/template"
 	"time"
 
+	"github.com/gforien/gf/internal/viper"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var gomnCmd = &cobra.Command{
@@ -53,7 +51,7 @@ func Gomn(cmd *cobra.Command, args []string) {
 		},
 	}
 
-	tplPath := unmarshalStringEnv("gomn.template_path")
+	tplPath := viper.UnmarshalStringEnv("gomn.template_path")
 
 	fileBytes, err := os.ReadFile(tplPath)
 	checkErr(err)
@@ -62,7 +60,7 @@ func Gomn(cmd *cobra.Command, args []string) {
 	tpls, err := template.New("titleTest").Funcs(funcMap).Parse(fileStr)
 	checkErr(err)
 
-	outDir := unmarshalStringEnv("gomn.output_dir")
+	outDir := viper.UnmarshalStringEnv("gomn.output_dir")
 
 	now := time.Now()
 	currentYear, currentMonth, _ := now.Date()
@@ -103,25 +101,6 @@ func writeNote(tpls *template.Template, day time.Time, outDir string) error {
 	log.Default().Printf("Templating '%s'", fileName)
 
 	return nil
-}
-
-// unmarshalStringEnv unmarshalls a viper config string containing
-// environment variables, and evaluate them.
-func unmarshalStringEnv(key string) string {
-	var str string
-	err := viper.UnmarshalKey(key, &str)
-	checkErr(err)
-
-	cmd := exec.Command(
-		"bash",
-		"-c",
-		fmt.Sprintf("echo %s", str))
-	outBytes, err := cmd.Output()
-	checkErr(err)
-
-	outStr := (string)(outBytes)
-	outStr = strings.TrimSpace(outStr)
-	return outStr
 }
 
 func init() {

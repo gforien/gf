@@ -1,4 +1,7 @@
-default: install
+default: test install
+
+test:
+  go test -v ./...
 
 install:
   go install
