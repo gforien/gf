@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"strings"
 
+	"github.com/gforien/gf/internal/viper"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // tfgrepCmd represents the tfgrep command
@@ -61,28 +60,9 @@ func writeLines(outputChan <-chan string) {
 	}
 }
 
-// readConfig reads config file $HOME/.gf.yaml and returns
-// a regex matching any of the defined patterns.
-func readConfig() (*regexp.Regexp, *regexp.Regexp) {
-	dotWords := []string{"Reading...", "Read complete"}
-	err := viper.UnmarshalKey("tfgrep.dot_patterns", &dotWords)
-	cobra.CheckErr(err)
-	dotPattern := "(" + strings.Join(dotWords, "|")
-	dotPattern = strings.TrimSuffix(dotPattern, "|") + ")"
-	dotRegex := regexp.MustCompile(dotPattern)
-
-	hideWords := []string{"Reading...", "Read complete"}
-	err = viper.UnmarshalKey("tfgrep.hide_patterns", &hideWords)
-	cobra.CheckErr(err)
-	hidePattern := "(" + strings.Join(hideWords, "|")
-	hidePattern = strings.TrimSuffix(hidePattern, "|") + ")"
-	hideRegex := regexp.MustCompile(hidePattern)
-
-	return dotRegex, hideRegex
-}
-
 func TfGrep(cmd *cobra.Command, args []string) {
-	dotRegex, hideRegex := readConfig()
+	dotRegex := viper.UnmarshalRegexArray("tfgrep.dot_patterns")
+	hideRegex := viper.UnmarshalRegexArray("tfgrep.hide_patterns")
 	inputChan := make(chan string)
 	outputChan := make(chan string)
 

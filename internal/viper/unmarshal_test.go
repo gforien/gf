@@ -3,6 +3,7 @@ package viper
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -50,6 +51,64 @@ func TestUnmarshalStringEnv(t *testing.T) {
 
 			// Check that the result matches the expected value
 			assert.Equal(t, tt.expected, result, "The evaluated path should match the expected result.")
+		})
+	}
+}
+
+func TestUnmarshalRegexArray(t *testing.T) {
+	type TestMatch struct {
+		given    string
+		expected bool
+	}
+
+	// Define test cases
+	tests := []struct {
+		name          string
+		viperKey      string
+		viperValue    interface{}
+		expectedRegex *regexp.Regexp
+		testMatch     []TestMatch
+	}{
+		{
+			name:          "Success",
+			viperKey:      "test_key",
+			viperValue:    []string{"abc", "def", "ghi"},
+			expectedRegex: regexp.MustCompile("(abc|def|ghi)"),
+			testMatch: []TestMatch{
+				{"abc", true},
+				{"def", true},
+				{"ghi", true},
+				{"xyz", false},
+			},
+		},
+		{
+			name:          "Empty array",
+			viperKey:      "empty_key",
+			viperValue:    []string{},
+			expectedRegex: regexp.MustCompile("a^"),
+			testMatch: []TestMatch{
+				{"any input", false},
+			},
+		},
+	}
+
+	// Run each test case
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// Set Viper configuration
+			if test.viperValue != nil {
+				viper.Set(test.viperKey, test.viperValue)
+			}
+
+			// Call the function and validate the results
+			regex := UnmarshalRegexArray(test.viperKey)
+
+			// Validate that the compiled regex matches as expected
+			for _, matchTest := range test.testMatch {
+				if result := regex.MatchString(matchTest.given); result != matchTest.expected {
+					t.Errorf("Test '%s': expected regex match for '%s' to be %v, but got %v", test.name, matchTest.given, matchTest.expected, result)
+				}
+			}
 		})
 	}
 }
