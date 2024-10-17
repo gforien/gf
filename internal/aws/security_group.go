@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"log"
+	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -39,9 +40,16 @@ func FindAndUpdateSg(ips []net.Ip) {
 	}
 	log.Default().Printf("Got %d security groups", len(sgResult.SecurityGroups))
 
+	var wg sync.WaitGroup
 	for _, sg := range sgResult.SecurityGroups {
-		AuthorizeInboundIps(ec2Client, sg, ips)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			AuthorizeInboundIps(ec2Client, sg, ips)
+		}()
 	}
+
+	wg.Wait()
 }
 
 func AuthorizeInboundIps(ec2Client *ec2.Client, sg types.SecurityGroup, ips []net.Ip) {
