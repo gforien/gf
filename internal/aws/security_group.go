@@ -8,9 +8,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/gforien/gf/internal/net"
 )
 
-func UpdateSg(ipv4 string, ipv6 string) {
+func FindAndUpdateSg(ips []net.Ip) {
 	// Load AWS config with the specified profile "gforien-prod"
 	cfg, err := config.LoadDefaultConfig(
 		context.TODO(),
@@ -39,63 +40,49 @@ func UpdateSg(ipv4 string, ipv6 string) {
 	log.Default().Printf("Got %d security groups", len(sgResult.SecurityGroups))
 
 	for _, sg := range sgResult.SecurityGroups {
-		allowIp(ec2Client, sg, ipv4, ipv6)
+		AuthorizeInboundIps(ec2Client, sg, ips)
 	}
 }
 
-func allowIp(ec2Client *ec2.Client, sg types.SecurityGroup, ipv4 string, ipv6 string) {
-	if ruleExists(sg, ipv4, ipv6) {
-		log.Default().Printf("Security group '%s' allows current IPv4/v6. Skipping.\n", *sg.GroupId)
+func AuthorizeInboundIps(ec2Client *ec2.Client, sg types.SecurityGroup, ips []net.Ip) {
+	log.Default().Printf("Checking security group '%s'", *sg.GroupId)
+	perms := []types.IpPermission{}
+	for _, ip := range ips {
+
+		if ip.ExistsInAwsSg(sg) {
+			log.Default().Printf("Security group '%s' allows '%s'. Skipping.\n", *sg.GroupId, ip)
+			continue
+		}
+
+		perms = append(perms, ip.ToAwsIpPerms())
+		log.Default().Printf("Adding %v to group", ip)
+	}
+	if len(perms) == 0 {
 		return
 	}
 
-	// Revoke all ingress rules
-	revokeInput := &ec2.RevokeSecurityGroupIngressInput{
+	// Cleanup group rules
+	if len(sg.IpPermissions) > 0 {
+		revokeInput := &ec2.RevokeSecurityGroupIngressInput{
+			GroupId:       sg.GroupId,
+			IpPermissions: sg.IpPermissions,
+		}
+		_, err := ec2Client.RevokeSecurityGroupIngress(context.TODO(), revokeInput)
+		if err != nil {
+			log.Default().Panic("failed to revoke security group ingress: " + err.Error())
+		}
+	}
+
+	autorizeInput := &ec2.AuthorizeSecurityGroupIngressInput{
 		GroupId:       sg.GroupId,
-		IpPermissions: sg.IpPermissions,
+		IpPermissions: perms,
 	}
-	log.Default().Printf("Security group '%s' emptied.\n", *sg.GroupId)
+	log.Default().Printf("Updating SG '%s' with group.\n", *sg.GroupId)
 
-	_, err := ec2Client.RevokeSecurityGroupIngress(context.TODO(), revokeInput)
+	_, err := ec2Client.AuthorizeSecurityGroupIngress(context.TODO(), autorizeInput)
 	if err != nil {
-		log.Default().Panic("failed to update security group ingress rules: " + err.Error())
-	}
-
-	// Update the security group ingress rules to allow IPv4 and IPv6
-	authorizeIngressInput := &ec2.AuthorizeSecurityGroupIngressInput{
-		GroupId: sg.GroupId,
-		IpPermissions: []types.IpPermission{
-			{
-				FromPort:   aws.Int32(0),
-				ToPort:     aws.Int32(65535),
-				IpProtocol: aws.String("-1"),
-				IpRanges:   []types.IpRange{{CidrIp: aws.String(ipv4 + "/32")}},
-				Ipv6Ranges: []types.Ipv6Range{{CidrIpv6: aws.String(ipv6 + "/128")}},
-			},
-		},
-	}
-
-	_, err = ec2Client.AuthorizeSecurityGroupIngress(context.TODO(), authorizeIngressInput)
-	if err != nil {
-		log.Default().Panic("failed to update security group ingress rules: " + err.Error())
+		log.Default().Panic("failed to update security group ingress: " + err.Error())
 	}
 
 	log.Default().Printf("Security group '%s' updated.\n", *sg.GroupId)
-}
-
-func ruleExists(sg types.SecurityGroup, ipv4, ipv6 string) bool {
-	for _, permission := range sg.IpPermissions {
-		for _, ipRange := range permission.IpRanges {
-			if *ipRange.CidrIp == ipv4+"/32" {
-				return true
-			}
-		}
-
-		for _, ipv6Range := range permission.Ipv6Ranges {
-			if *ipv6Range.CidrIpv6 == ipv6+"/128" {
-				return true
-			}
-		}
-	}
-	return false
 }

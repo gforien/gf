@@ -16,15 +16,15 @@ var inboundIpCmd = &cobra.Command{
 }
 
 func inboundIp(cmd *cobra.Command, args []string) {
-	// Retrieve public IPv4 and IPv6
-	ipv4, ipv6, err := net.GetPublicIPs()
+	ips, err := net.GetPublicIps([]string{
+		"https://api.ipify.org",
+		"https://api6.ipify.org",
+	})
 	if err != nil {
 		log.Default().Panic("unable to get public IP: " + err.Error())
 	}
-	log.Default().Printf("Got public IPv4: %s\n", ipv4)
-	log.Default().Printf("Got public IPv6: %s\n", ipv6)
 
-	aws.UpdateSg(ipv4, ipv6)
+	aws.FindAndUpdateSg(ips)
 }
 
 func init() {
