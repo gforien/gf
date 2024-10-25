@@ -6,22 +6,12 @@ import (
 	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/gforien/gf/internal/net"
 )
 
-func FindAndUpdateSg(ips []net.Ip) {
-	// Load AWS config with the specified profile "gforien-prod"
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		config.WithSharedConfigProfile("gforien-prod"),
-	)
-	if err != nil {
-		log.Default().Panic("unable to load AWS SDK config: " + err.Error())
-	}
-
+func FindAndUpdateSg(cfg aws.Config, ips []net.Ip) {
 	ec2Client := ec2.NewFromConfig(cfg)
 
 	// Filter security group by tag "Name" == "inbound-myip"
