@@ -42,20 +42,12 @@ func FindAndUpdateSg(cfg aws.Config, ips []net.Ip) {
 	wg.Wait()
 }
 
-func AuthorizeInboundIps(ec2Client *ec2.Client, sg types.SecurityGroup, ips []net.Ip) {
+func AuthorizeInboundIps(ec2Client *ec2.Client, sg types.SecurityGroup, ips net.IpList) {
 	log.Default().Printf("Checking security group '%s'", *sg.GroupId)
-	perms := []types.IpPermission{}
-	for _, ip := range ips {
 
-		if ip.ExistsInAwsSg(sg) {
-			log.Default().Printf("Security group '%s' allows '%s'. Skipping.\n", *sg.GroupId, ip)
-			continue
-		}
-
-		perms = append(perms, ip.ToAwsIpPerms())
-		log.Default().Printf("Adding %v to group", ip)
-	}
-	if len(perms) == 0 {
+	perms := ips.ToAwsIpPerms()
+	if EqualsIpPerms(perms, sg.IpPermissions) {
+		log.Default().Printf("Security group '%s' allow group. Skipping.", *sg.GroupId)
 		return
 	}
 

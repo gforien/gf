@@ -7,9 +7,6 @@ import (
 	"net"
 	"net/http"
 	"strings"
-
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 type (
@@ -42,50 +39,6 @@ func (ip Ip) GetCidr() string {
 		return fmt.Sprintf("%s/128", ip)
 	}
 	return fmt.Sprintf("%s/32", ip)
-}
-
-func (ip Ip) ToAwsIpPerms() types.IpPermission {
-	cidr := ip.GetCidr()
-
-	if ip.GetVersion() == IPv6 {
-		return types.IpPermission{
-			FromPort:   aws.Int32(0),
-			ToPort:     aws.Int32(65535),
-			IpProtocol: aws.String("-1"),
-			IpRanges:   []types.IpRange{},
-			Ipv6Ranges: []types.Ipv6Range{{CidrIpv6: aws.String(cidr)}},
-		}
-	}
-
-	return types.IpPermission{
-		FromPort:   aws.Int32(0),
-		ToPort:     aws.Int32(65535),
-		IpProtocol: aws.String("-1"),
-		IpRanges:   []types.IpRange{{CidrIp: aws.String(cidr)}},
-		Ipv6Ranges: []types.Ipv6Range{},
-	}
-}
-
-func (ip Ip) ExistsInAwsSg(sg types.SecurityGroup) bool {
-	for _, permission := range sg.IpPermissions {
-		ipCidr := ip.GetCidr()
-
-		switch ip.GetVersion() {
-		case IPv6:
-			for _, ipv6Range := range permission.Ipv6Ranges {
-				if *ipv6Range.CidrIpv6 == ipCidr {
-					return true
-				}
-			}
-		default:
-			for _, ipRange := range permission.IpRanges {
-				if *ipRange.CidrIp == ipCidr {
-					return true
-				}
-			}
-		}
-	}
-	return false
 }
 
 // Get host public IP from an external API
