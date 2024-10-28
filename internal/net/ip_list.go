@@ -7,7 +7,7 @@ import (
 
 type IpList []Ip
 
-func (ipl IpList) ToAwsIpPerms() []types.IpPermission {
+func (ipl IpList) ToAwsIpPerms(port *int32, protocol *string) []types.IpPermission {
 	var ipv4 []types.IpRange
 	var ipv6 []types.Ipv6Range
 
@@ -23,7 +23,9 @@ func (ipl IpList) ToAwsIpPerms() []types.IpPermission {
 
 	return []types.IpPermission{
 		{
-			IpProtocol: aws.String("-1"),
+			FromPort:   port,
+			ToPort:     port,
+			IpProtocol: protocol,
 			IpRanges:   ipv4,
 			Ipv6Ranges: ipv6,
 		},

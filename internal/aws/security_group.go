@@ -19,7 +19,7 @@ func FindAndUpdateSg(cfg aws.Config, ips []net.Ip) {
 		Filters: []types.Filter{
 			{
 				Name:   aws.String("tag:Name"),
-				Values: []string{"inbound-myip"},
+				Values: []string{"*-myip"},
 			},
 		},
 	}
@@ -45,7 +45,18 @@ func FindAndUpdateSg(cfg aws.Config, ips []net.Ip) {
 func AuthorizeInboundIps(ec2Client *ec2.Client, sg types.SecurityGroup, ips net.IpList) {
 	log.Default().Printf("Checking security group '%s'", *sg.GroupId)
 
-	perms := ips.ToAwsIpPerms()
+	if len(sg.IpPermissions) < 1 {
+		log.Default().Printf("Security group '%s' is empty. Skipping.", *sg.GroupId)
+		return
+	}
+
+	port := sg.IpPermissions[0].FromPort
+	protocol := sg.IpPermissions[0].IpProtocol
+	if port == nil || protocol == nil {
+		log.Default().Printf("Security group '%s' has nil port or protocol. Skipping.", *sg.GroupId)
+		return
+	}
+	perms := ips.ToAwsIpPerms(port, protocol)
 	if EqualsIpPerms(perms, sg.IpPermissions) {
 		log.Default().Printf("Security group '%s' allow group. Skipping.", *sg.GroupId)
 		return
