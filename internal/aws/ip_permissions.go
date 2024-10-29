@@ -8,6 +8,9 @@ import (
 )
 
 func EqualsIpPerms(a []types.IpPermission, b []types.IpPermission) bool {
+	if (a == nil && len(b) == 0) || (b == nil && len(a) == 0) {
+		return true
+	}
 	if a == nil || b == nil {
 		return a == nil && b == nil
 	}
@@ -31,6 +34,9 @@ func EqualsIpPerms(a []types.IpPermission, b []types.IpPermission) bool {
 }
 
 func EqualsIpRange(a []types.IpRange, b []types.IpRange) bool {
+	if (a == nil && len(b) == 0) || (b == nil && len(a) == 0) {
+		return true
+	}
 	if a == nil || b == nil {
 		return a == nil && b == nil
 	}
@@ -46,6 +52,9 @@ func EqualsIpRange(a []types.IpRange, b []types.IpRange) bool {
 }
 
 func EqualsIpv6Range(a []types.Ipv6Range, b []types.Ipv6Range) bool {
+	if (a == nil && len(b) == 0) || (b == nil && len(a) == 0) {
+		return true
+	}
 	if a == nil || b == nil {
 		return a == nil && b == nil
 	}
@@ -61,6 +70,9 @@ func EqualsIpv6Range(a []types.Ipv6Range, b []types.Ipv6Range) bool {
 }
 
 func EqualsString(a *string, b *string) bool {
+	if (a == nil && b != nil && len(*b) == 0) || (b == nil && a != nil && len(*a) == 0) {
+		return true
+	}
 	if a == nil || b == nil {
 		return a == nil && b == nil
 	}

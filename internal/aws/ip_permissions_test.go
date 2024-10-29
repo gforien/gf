@@ -20,9 +20,15 @@ func TestEqualsIpPerms(t *testing.T) {
 			expected: true,
 		},
 		{
-			name:     "One nil slice",
+			name:     "One nil and one empty slice",
 			a:        nil,
 			b:        []types.IpPermission{},
+			expected: true,
+		},
+		{
+			name:     "One nil slice",
+			a:        nil,
+			b:        []types.IpPermission{{IpProtocol: stringPointer("tcp")}},
 			expected: false,
 		},
 		{
@@ -79,9 +85,15 @@ func TestEqualsIpRange(t *testing.T) {
 			expected: true,
 		},
 		{
-			name:     "One nil slice",
+			name:     "One nil and one empty slice",
 			a:        nil,
 			b:        []types.IpRange{},
+			expected: true,
+		},
+		{
+			name:     "One nil slice",
+			a:        nil,
+			b:        []types.IpRange{{CidrIp: stringPointer("192.168.1.0/24")}},
 			expected: false,
 		},
 		{
@@ -128,9 +140,15 @@ func TestEqualsIpv6Range(t *testing.T) {
 			expected: true,
 		},
 		{
-			name:     "One nil slice",
+			name:     "One nil and one empty slice",
 			a:        nil,
 			b:        []types.Ipv6Range{},
+			expected: true,
+		},
+		{
+			name:     "One nil slice",
+			a:        nil,
+			b:        []types.Ipv6Range{{CidrIpv6: stringPointer("2001:db8::/32")}},
 			expected: false,
 		},
 		{
@@ -171,13 +189,19 @@ func TestEqualsString(t *testing.T) {
 		expected bool
 	}{
 		{
-			name:     "Both nil",
+			name:     "Nil strings",
 			a:        nil,
 			b:        nil,
 			expected: true,
 		},
 		{
-			name:     "One nil",
+			name:     "One nil and one empty string",
+			a:        nil,
+			b:        stringPointer(""),
+			expected: true,
+		},
+		{
+			name:     "One nil string",
 			a:        nil,
 			b:        stringPointer("test"),
 			expected: false,
