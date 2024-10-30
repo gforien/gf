@@ -18,8 +18,8 @@
 {{ range .CommitGroups -}}
 ### {{ .Title }}
 {{ range .Commits -}}
-{{ $commitURL := printf "%s/commit/%s" $.Info.RepositoryURL .Hash.Long }}
-{{ $commitLink := printf "[`%s`](%s)" .Hash.Short $commitURL }}
+{{ $commitURL := printf "%s/commit/%s" $.Info.RepositoryURL .Hash.Long -}}
+{{ $commitLink := printf "[`%s`](%s)" .Hash.Short $commitURL -}}
 - {{ if .Scope }}**{{ .Scope }}:** {{ end }}{{ .Subject }} ({{ $commitLink }})
 {{ end }}
 {{ end -}}
