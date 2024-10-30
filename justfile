@@ -4,7 +4,7 @@ test:
   go test -v ./...
 
 install:
-  go install
+  go install ./cmd/gf/
   gf completion zsh > /opt/homebrew/share/zsh-completions/_gf
 
 chlog: changelog

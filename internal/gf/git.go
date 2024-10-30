@@ -1,4 +1,4 @@
-package cmd
+package gf
 
 import (
 	"github.com/gforien/gf/internal/git"
@@ -21,5 +21,5 @@ var gitClone = &cobra.Command{
 
 func init() {
 	gitCmd.AddCommand(gitClone)
-	rootCmd.AddCommand(gitCmd)
+	RootCmd.AddCommand(gitCmd)
 }

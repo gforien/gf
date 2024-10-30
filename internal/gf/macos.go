@@ -1,4 +1,4 @@
-package cmd
+package gf
 
 import (
 	"fmt"
@@ -22,5 +22,5 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	rootCmd.AddCommand(macosCmd)
+	RootCmd.AddCommand(macosCmd)
 }

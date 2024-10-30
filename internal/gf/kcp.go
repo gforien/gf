@@ -1,4 +1,4 @@
-package cmd
+package gf
 
 import (
 	"encoding/json"
@@ -70,5 +70,5 @@ func Kcp(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	rootCmd.AddCommand(kcpCmd)
+	RootCmd.AddCommand(kcpCmd)
 }

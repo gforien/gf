@@ -1,4 +1,4 @@
-package cmd
+package gf
 
 import (
 	"errors"
@@ -104,5 +104,5 @@ func writeNote(tpls *template.Template, day time.Time, outDir string) error {
 }
 
 func init() {
-	rootCmd.AddCommand(gomnCmd)
+	RootCmd.AddCommand(gomnCmd)
 }

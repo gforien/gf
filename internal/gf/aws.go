@@ -1,4 +1,4 @@
-package cmd
+package gf
 
 import (
 	"github.com/spf13/cobra"
@@ -11,5 +11,5 @@ var awsCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(awsCmd)
+	RootCmd.AddCommand(awsCmd)
 }

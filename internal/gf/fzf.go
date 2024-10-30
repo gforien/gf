@@ -1,4 +1,4 @@
-package cmd
+package gf
 
 import (
 	"github.com/gforien/gf/internal/fzf"
@@ -18,5 +18,5 @@ var fzfPlanets = &cobra.Command{
 
 func init() {
 	fzfCmd.AddCommand(fzfPlanets)
-	rootCmd.AddCommand(fzfCmd)
+	RootCmd.AddCommand(fzfCmd)
 }

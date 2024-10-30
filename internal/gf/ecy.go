@@ -1,4 +1,4 @@
-package cmd
+package gf
 
 import (
 	"fmt"
@@ -47,5 +47,5 @@ func Ecy(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	rootCmd.AddCommand(ecyCmd)
+	RootCmd.AddCommand(ecyCmd)
 }

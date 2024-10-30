@@ -1,4 +1,4 @@
-package cmd
+package gf
 
 import (
 	"github.com/gforien/gf/internal/tmux"
@@ -19,5 +19,5 @@ var tmuxNeww = &cobra.Command{
 
 func init() {
 	tmuxCmd.AddCommand(tmuxNeww)
-	rootCmd.AddCommand(tmuxCmd)
+	RootCmd.AddCommand(tmuxCmd)
 }

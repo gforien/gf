@@ -1,4 +1,4 @@
-package cmd
+package gf
 
 import (
 	"bufio"
@@ -72,5 +72,5 @@ func TfGrep(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	rootCmd.AddCommand(tfgrepCmd)
+	RootCmd.AddCommand(tfgrepCmd)
 }
