@@ -86,10 +86,10 @@ func writeNote(tpls *template.Template, day time.Time, outDir string) error {
 	filePath := outDir + fileName
 
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
-	defer file.Close()
 	if err != nil {
 		return &ErrFileExists{fileName}
 	}
+	defer file.Close()
 
 	// Write content to the file (if necessary)
 	err = tpls.Execute(file, map[string]any{
