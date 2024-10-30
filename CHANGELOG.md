@@ -1,10 +1,20 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+
+<a name="0.8.0"></a>
+## [0.8.0] - 2024-10-30
 ### Chore
-- setup git-chglog and generate CHANGELOG.md
-- **git-chglog:** add commit links in CHANGELOG and regenerate CHANGELOG
-- **git-chglog:** fix git-chglog default regex and regenerate CHANGELOG
+- setup git-chglog and generate CHANGELOG.md ([`781ecf2`](https://github.com/gforien/gf/commit/781ecf2eb079fcf4d24156e153757c72d3c00070))
+- **git-chglog:** typo in CHANGELOG go template ([`4a34b53`](https://github.com/gforien/gf/commit/4a34b53990bf3d7f18f8d5b40c9be4b3c9be2e07))
+- **git-chglog:** add commit links in CHANGELOG and regenerate CHANGELOG ([`6440b90`](https://github.com/gforien/gf/commit/6440b9056d8e40cc5c4733106542652373bfd7ee))
+- **git-chglog:** fix git-chglog default regex and regenerate CHANGELOG ([`29e40c9`](https://github.com/gforien/gf/commit/29e40c965979b2f246f3834ba3dfd907fde53c7a))
+
+### Feat
+- init wasm entrypoint ([`ae017d3`](https://github.com/gforien/gf/commit/ae017d3f18578923045ffec6ebe16a5763026fae))
+
+### Refactor
+- move entrypoint to ./cmd/gf ([`d2a3219`](https://github.com/gforien/gf/commit/d2a321968307c31c37f93f0fbc4fad4972717538))
 
 
 <a name="0.7.0"></a>
@@ -97,7 +107,8 @@
 - **ecy:** configuration file path changed ([#2](https://github.com/gforien/gf/issues/2)) ([`14750d0`](https://github.com/gforien/gf/commit/14750d0224917b76d67cbf02b2a2c4230085c096))
 
 
-[Unreleased]: https://github.com/gforien/gf/compare/0.7.0...HEAD
+[Unreleased]: https://github.com/gforien/gf/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/gforien/gf/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/gforien/gf/compare/0.6.3...0.7.0
 [0.6.3]: https://github.com/gforien/gf/compare/0.6.2...0.6.3
 [0.6.2]: https://github.com/gforien/gf/compare/0.6.1...0.6.2
