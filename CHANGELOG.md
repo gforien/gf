@@ -1,6 +1,9 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+### Chore
+- setup git-chglog and generate CHANGELOG.md
+
 
 <a name="0.7.0"></a>
 ## [0.7.0] - 2024-10-30
@@ -15,15 +18,27 @@
 
 <a name="0.6.3"></a>
 ## [0.6.3] - 2024-10-29
+### Fix
+- **aws/inboundIp:** nil != [] empty slice when comparing IpPerms
+
 
 <a name="0.6.2"></a>
 ## [0.6.2] - 2024-10-28
+### Fix
+- **aws/inboundIp:** edit IP and keep port/protocol when editing SG
+
 
 <a name="0.6.1"></a>
 ## [0.6.1] - 2024-10-25
+### Fix
+- **aws/inboundIp:** revoke and authorize the whole group
+
 
 <a name="0.6.0"></a>
 ## [0.6.0] - 2024-10-25
+### Feat
+- **aws/inboundIp:** set inbound IPs for multiple profiles
+
 
 <a name="0.5.0"></a>
 ## [0.5.0] - 2024-10-22
@@ -33,9 +48,15 @@
 
 <a name="0.4.2"></a>
 ## [0.4.2] - 2024-10-17
+### Fix
+- **aws/inboundIp:** update security groups asynchronously
+
 
 <a name="0.4.1"></a>
 ## [0.4.1] - 2024-10-17
+### Fix
+- **aws/inboundIp:** set ipv4/ipv6 independently of each other
+
 
 <a name="0.4.0"></a>
 ## [0.4.0] - 2024-10-15
