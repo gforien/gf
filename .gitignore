@@ -3,7 +3,7 @@
 #
 # Binaries for programs and plugins
 /gf
-/wasm
+main.wasm
 *.exe
 *.exe~
 *.dll
