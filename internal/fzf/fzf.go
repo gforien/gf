@@ -6,9 +6,9 @@ import (
 	"os/exec"
 )
 
-type Cmd []string
+type Options []string
 
-func Popup(cmdString Cmd) {
+func Popup(args []string) {
 	outputChan := make(chan string)
 	go func() {
 		for s := range outputChan {
@@ -16,7 +16,7 @@ func Popup(cmdString Cmd) {
 		}
 	}()
 
-	opts := Cmd{"--multi", "--reverse", "--border", "-p", "50%"}
+	opts := Options{"--multi", "--reverse", "--border", "-p", "50%"}
 	cmd := exec.Command("fzf-tmux", opts...)
 
 	stdin, err := cmd.StdinPipe()
@@ -28,7 +28,7 @@ func Popup(cmdString Cmd) {
 	// Goroutine to read from inputChan and write to stdin
 	go func() {
 		defer stdin.Close()
-		for _, s := range cmdString {
+		for _, s := range args {
 			if _, err := io.WriteString(stdin, s+"\n"); err != nil {
 				fmt.Println("Error writing to stdin:", err)
 				return
