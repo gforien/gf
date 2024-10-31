@@ -30,6 +30,15 @@ var fzfManPages = &cobra.Command{
 	},
 }
 
+var fzfRfc = &cobra.Command{
+	Use:   "rfc",
+	Short: "RFC pages fuzzy-finder",
+	Run: func(cmd *cobra.Command, args []string) {
+		res := fzf.PopupFile(os.Getenv("RFC_CACHE")+"/INDEX", &fzf.Options{})
+		fmt.Print(res)
+	},
+}
+
 var fzfPlanets = &cobra.Command{
 	Use:   "planets",
 	Short: "Planets fuzzy-finder, mostly for debugging/testing",
@@ -45,5 +54,6 @@ func init() {
 	fzfCmd.AddCommand(fzfBrewPackages)
 	fzfCmd.AddCommand(fzfManPages)
 	fzfCmd.AddCommand(fzfPlanets)
+	fzfCmd.AddCommand(fzfRfc)
 	RootCmd.AddCommand(fzfCmd)
 }
