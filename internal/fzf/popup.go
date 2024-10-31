@@ -1,9 +1,11 @@
 package fzf
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 )
 
@@ -15,6 +17,19 @@ func Popup(args []string, addOpts *Options) string {
 	cmd, stdin := initPopup(addOpts)
 
 	go feedArgs(stdin, args)
+
+	res, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Default().Fatalln("Error when running fzf:", err)
+	}
+	return string(res)
+}
+
+// PopupFile is a duplicate of Popup but reading a file instead of []strings
+func PopupFile(path string, addOpts *Options) string {
+	cmd, stdin := initPopup(addOpts)
+
+	go feedFile(stdin, path)
 
 	res, err := cmd.CombinedOutput()
 	if err != nil {
@@ -41,6 +56,7 @@ func initPopup(opts *Options) (*exec.Cmd, io.WriteCloser) {
 	return cmd, stdin
 }
 
+// feedArgs reads a slice of strings and writes them to stdin
 func feedArgs(stdin io.WriteCloser, args []string) {
 	defer stdin.Close()
 	for _, s := range args {
@@ -48,5 +64,29 @@ func feedArgs(stdin io.WriteCloser, args []string) {
 			fmt.Println("Error writing to stdin:", err)
 			return
 		}
+	}
+}
+
+// feedArgs reads a file and writes it to stdin
+func feedFile(stdin io.WriteCloser, path string) {
+	defer stdin.Close()
+
+	f, err := os.OpenFile(path, os.O_RDONLY, 0)
+	if err != nil {
+		log.Default().Fatalln("Error opening file:", err)
+	}
+	defer f.Close()
+
+	scan := bufio.NewScanner(f)
+	for scan.Scan() {
+		line := scan.Text()
+		if _, err := io.WriteString(stdin, line+"\n"); err != nil {
+			log.Default().Fatalln("Error writing to stdin:", err)
+			return
+		}
+	}
+
+	if err := scan.Err(); err != nil {
+		log.Default().Fatalln("Error reading file:", err)
 	}
 }
