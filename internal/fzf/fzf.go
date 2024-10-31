@@ -3,42 +3,50 @@ package fzf
 import (
 	"fmt"
 	"io"
+	"log"
 	"os/exec"
 )
 
 type Options []string
 
-func Popup(args []string) {
-	outputChan := make(chan string)
-	go func() {
-		for s := range outputChan {
-			fmt.Println("Got: " + s)
-		}
-	}()
+var defaultOpts = Options{"-p", "50%"}
 
-	opts := Options{"--multi", "--reverse", "--border", "-p", "50%"}
-	cmd := exec.Command("fzf-tmux", opts...)
+func Popup(args []string, addOpts *Options) string {
+	cmd, stdin := initPopup(addOpts)
+
+	go feedArgs(stdin, args)
+
+	res, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Default().Fatalln("Error when running fzf:", err)
+	}
+	return string(res)
+}
+
+func initPopup(opts *Options) (*exec.Cmd, io.WriteCloser) {
+	if opts == nil {
+		log.Default().Fatalln("Error: opts is nil")
+	}
+	for _, o := range *opts {
+		defaultOpts = append(defaultOpts, o)
+	}
+	cmd := exec.Command("fzf-tmux", defaultOpts...)
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		fmt.Println("Error creating stdin pipe:", err)
-		return
+		log.Default().Fatalln("Error creating stdin pipe: ", err)
+		return nil, nil
 	}
 
-	// Goroutine to read from inputChan and write to stdin
-	go func() {
-		defer stdin.Close()
-		for _, s := range args {
-			if _, err := io.WriteString(stdin, s+"\n"); err != nil {
-				fmt.Println("Error writing to stdin:", err)
-				return
-			}
-		}
-	}()
+	return cmd, stdin
+}
 
-	// Start the command
-	if err := cmd.Run(); err != nil {
-		fmt.Println("Error starting command:", err)
-		return
+func feedArgs(stdin io.WriteCloser, args []string) {
+	defer stdin.Close()
+	for _, s := range args {
+		if _, err := io.WriteString(stdin, s+"\n"); err != nil {
+			fmt.Println("Error writing to stdin:", err)
+			return
+		}
 	}
 }
