@@ -11,7 +11,11 @@ import (
 
 type Options []string
 
-var defaultOpts = Options{"-p", "50%"}
+var defaultOpts = Options{
+	"--bind=ctrl-l:replace-query",
+	"--bind=ctrl-c:abort",
+	"-p", "50%",
+}
 
 func Popup(args []string, addOpts *Options) string {
 	cmd, stdin := initPopup(addOpts)
